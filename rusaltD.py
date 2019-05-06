@@ -65,6 +65,7 @@ def load_modules():
     iraf.apextract()
     iraf.imutil()
     iraf.rvsao(motd='no')
+
 # System specific path to pysalt
 pysaltpath = '/iraf/extern/pysalt'
 
@@ -285,6 +286,23 @@ def get_chipgaps(hdu):
         chipgap2 = (np.min(w[w > 1750]) - 1, np.max(w[w < 2350]) + 1)
         # edge of chip 3=
         chipgap3 = (np.min(w[w > 2900]) - 1, hdu[2].data.shape[1] + 1)
+        x_2= d.shape[0]/2
+        if chipgap1==chipgap2:
+                dt = d[x_2][1:(d.shape[1])]-d[x_2][0:(d.shape[1]-1)]
+                print(dt)
+                sigma= np.std(dt)
+                dt=np.array(dt)
+                print(np.isclose( dt[0:(d.shape[1]-2)], dt[1:(d.shape[1]-1)] ))
+                w= np.where(np.logical_or(np.isclose( dt[0:(d.shape[1]-2)], dt[1:(d.shape[1]-1)],rtol=1e-4 ) ,bpm[x_2][0:(bpm.shape[1]-2)]>0 )  )
+                w= np.array(w)
+        print(w)
+        print(w>700)
+	# Chip 1
+        chipgap1 = (np.min(w[w > 700]) - 1, np.max(w[(w < 1300)]) + 1)
+        # Chip 2
+        chipgap2 = (np.min(w[(w > 1750)]) - 1, np.max(w[(w < 2350)]) + 1)
+        # edge of chip 3=
+        chipgap3 = (np.min(w[(w > 2900)]) - 1, hdu[2].data.shape[1] + 1)
         return (chipgap1, chipgap2, chipgap3)
 
 
@@ -342,6 +360,7 @@ def rectify(ids=None, fs=None):
         chipgaps = get_chipgaps(h)
         print(" -- chipgaps --")
         print(chipgaps)
+
         # Chip 1
         h[2].data[:, chipgaps[0][0]:chipgaps[0][1]] = 1
         # Chip 2
@@ -695,6 +714,7 @@ def stdsensfunc(fs=None):
             S= np.genfromtxt(outfile,skip_header=40,skip_footer=40)
             np.savetxt(outfile,S)
             os.remove(asciispec)
+            
     iraf.cd('..')
 
 
@@ -921,7 +941,7 @@ def speccombine(fs=None):
     if os.path.exists(combfile):
         os.remove(combfile)
     iraf.scombine(iraf_filelist, combfile, scale='@flx/scales.dat',
-                  reject='avsigclip', lthreshold=-1e-17)
+                  reject='avsigclip', lthreshold=-2e-16)
 
     # Remove the other apertures [TBD]
     # remove the sky and arc bands from the combined spectra. (or add back?? TBD)
@@ -964,10 +984,11 @@ def speccombine(fs=None):
 
 # Define the telluric bands wavelength regions
 # These numbers were taken directly from Tom Matheson's Cal code from Jeff
+# Silverman
+#telluricWaves = {'B': (6855, 6935), 'A': (7590, 7685)}
 #telluricWaves = [(2000., 3190.), (3216., 3420.), (5500., 6050.), (6250., 6360.),
 #                 (6450., 6530.), (6840., 7410.), (7560., 8410.), (8800., 9900.)]
 telluricWaves = [(6250., 6360.), (6450., 6530.), (6855., 7400.), (7580., 7720.)]
-
 
 
 def fitshdr_to_wave(hdr):
