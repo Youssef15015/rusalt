@@ -271,14 +271,13 @@ def get_chipgaps(hdu):
         # Note this throws away one extra pixel on either side but it seems to
         # be necessary.
         ccdsum = int(hdu[0].header['CCDSUM'].split()[1])
-
         #ypix = slice(200 / ccdsum + 1, 3800 / ccdsum)  [swj CHANGE]
         ypix = slice(1000 / ccdsum + 1, 3000 / ccdsum)
+        ypix= slice(450,550)
         d = hdu[1].data[ypix].copy()
         bpm = hdu[2].data[ypix].copy()
-
         w = np.where(np.logical_or(bpm > 0, d == 0))[1]
-
+        print(w)
         # Note we also grow the chip gap by 1 pixel on each side
         # Chip 1
         chipgap1 = (np.min(w[w > 700]) - 1, np.max(w[w < 1300]) + 1)
@@ -286,23 +285,18 @@ def get_chipgaps(hdu):
         chipgap2 = (np.min(w[w > 1750]) - 1, np.max(w[w < 2350]) + 1)
         # edge of chip 3=
         chipgap3 = (np.min(w[w > 2900]) - 1, hdu[2].data.shape[1] + 1)
-        x_2= d.shape[0]/2
         if chipgap1==chipgap2:
-                dt = d[x_2][1:(d.shape[1])]-d[x_2][0:(d.shape[1]-1)]
-                print(dt)
-                sigma= np.std(dt)
-                dt=np.array(dt)
-                print(np.isclose( dt[0:(d.shape[1]-2)], dt[1:(d.shape[1]-1)] ))
-                w= np.where(np.logical_or(np.isclose( dt[0:(d.shape[1]-2)], dt[1:(d.shape[1]-1)],rtol=1e-4 ) ,bpm[x_2][0:(bpm.shape[1]-2)]>0 )  )
-                w= np.array(w)
-        print(w)
-        print(w>700)
-	# Chip 1
-        chipgap1 = (np.min(w[w > 700]) - 1, np.max(w[(w < 1300)]) + 1)
+                print(d[ypix].shape)
+                dt = d[:,1:(d.shape[1])]-d[:,0:(d.shape[1]-1)]
+                w= np.where(np.logical_or( np.isclose( dt[:,0:(dt.shape[1]-1)], dt[:,1:(dt.shape[1])],rtol=1e-10)  ,bpm[:,0:(bpm.shape[1]-2)]>0 ))[1]
+                print(w)
+               
+	    # Chip 1
+        chipgap1 = (np.min(w[w > 900]) - 1, np.max(w[(w < 1150)]) + 3)
         # Chip 2
-        chipgap2 = (np.min(w[(w > 1750)]) - 1, np.max(w[(w < 2350)]) + 1)
+        chipgap2 = (np.min(w[(w > 1800)]) - 1, np.max(w[(w < 2300)]) + 3)
         # edge of chip 3=
-        chipgap3 = (np.min(w[(w > 2900)]) - 1, hdu[2].data.shape[1] + 1)
+        chipgap3 = (np.min(w[(w > 2900)]) - 1, hdu[2].data.shape[1] + 3)
         return (chipgap1, chipgap2, chipgap3)
 
 
