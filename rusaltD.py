@@ -285,20 +285,7 @@ def get_chipgaps(hdu):
         chipgap2 = (np.min(w[w > 1750]) - 1, np.max(w[w < 2350]) + 1)
         # edge of chip 3=
         chipgap3 = (np.min(w[w > 2900]) - 1, hdu[2].data.shape[1] + 1)
-        if chipgap1==chipgap2:
-                print(d[ypix].shape)
-                dt = d[:,1:(d.shape[1])]-d[:,0:(d.shape[1]-1)]
-                w= np.where(np.logical_or( np.isclose( dt[:,0:(dt.shape[1]-1)], dt[:,1:(dt.shape[1])],rtol=1e-10)  ,bpm[:,0:(bpm.shape[1]-2)]>0 ))[1]
-                print(w)
-               
-	    # Chip 1
-        chipgap1 = (np.min(w[w > 900]) - 1, np.max(w[(w < 1150)]) + 3)
-        # Chip 2
-        chipgap2 = (np.min(w[(w > 1800)]) - 1, np.max(w[(w < 2300)]) + 3)
-        # edge of chip 3=
-        chipgap3 = (np.min(w[(w > 2900)]) - 1, hdu[2].data.shape[1] + 3)
-        return (chipgap1, chipgap2, chipgap3)
-
+        return(chipgap1,chipgap2,chipgap3)
 
 def rectify(ids=None, fs=None):
     iraf.cd('work')
