@@ -734,7 +734,7 @@ def fluxcal(stdsfolder='./', fs=None):
         # Get the standard sensfunc with the same grating angle
         stdfile = None
         for stdf in stdfiles:
-            if ga in stdf:
+            if np.isclose(float(ga),float(stdf.split('/')[stdf.count('/')][3:8]),rtol=1e-2):
                 # Get the right chip number
                 if chip == stdf[-5]:
                     stdfile = stdf
